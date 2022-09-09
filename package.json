@@ -1,0 +1,23 @@
+{
+  "name": "wait-for-github-action",
+  "version": "1.0.0",
+  "description": "Github Action for waiting while another action completes",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/infurnia/wait-for-github-action.git"
+  },
+  "author": "dishank-infurnia",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/infurnia/wait-for-github-action/issues"
+  },
+  "homepage": "https://github.com/infurnia/wait-for-github-action#readme",
+  "dependencies": {
+    "@actions/core": "^1.9.1",
+    "@actions/github": "^5.0.3"
+  }
+}

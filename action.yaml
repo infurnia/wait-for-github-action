@@ -1,0 +1,22 @@
+name: 'Wait for Github Action'
+description: 'Wait for another github action to complete'
+author: 'dishank-infurnia'
+inputs:
+  auth:
+    description: 'The GitHub API token.'
+    required: true
+  owner:
+    description: 'The GitHub owner of the repository.'
+    required: true
+  repo:
+    description: 'The name of the repository.'
+    required: true
+  interval:
+    description: 'Interval (in seconds) for polling completion'
+    required: true
+  workflow_name:
+    description: 'Name of the workflow to poll'
+    required: true
+runs:
+  using: 'node16'
+  main: 'index.js'
