@@ -9680,7 +9680,8 @@ const github = __nccwpck_require__(2835);
         let workflow = (await octokit.request('GET /repos/{owner}/{repo}/actions/workflows', {
             "owner": owner,
             "repo": repo,
-        })).data.workflows.filter(e => e.name == workflow_name)[0];
+        }))
+        workflow =  workflow.data.workflows.filter(e => e.name == workflow_name && e.state == 'active')[0];
         const workflow_id = workflow.id;
 
         console.log("Found workflow id: " + workflow_id);
