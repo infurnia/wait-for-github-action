@@ -9,9 +9,24 @@ const github = require('@actions/github');
         const interval = core.getInput('interval');
         const workflow_name = core.getInput('workflow_name');
         const octokit = github.getOctokit(auth);
+        // Retries temporary GitHub API failures (5xx, timeouts, connection
+        // resets) so a blip does not fail the release that is waiting.
+        // A 4xx (bad token, missing workflow) still fails at once.
+        const request = async (route, params) => {
+            for (let attempt = 1; ; attempt++) {
+                try {
+                    return await octokit.request(route, params);
+                } catch (error) {
+                    const temporary = !error.status || error.status >= 500;
+                    if (!temporary || attempt >= 5) throw error;
+                    console.log(`GitHub API ${route} failed (${error.status || error.message}), attempt ${attempt} of 5; retrying in ${attempt * 10}s`);
+                    await timeout(attempt * 10 * 1000);
+                }
+            }
+        };
 
         // Get the workflow id
-        let workflow = (await octokit.request('GET /repos/{owner}/{repo}/actions/workflows', {
+        let workflow = (await request('GET /repos/{owner}/{repo}/actions/workflows', {
             "owner": owner,
             "repo": repo,
         }))
@@ -20,7 +35,7 @@ const github = require('@actions/github');
 
         console.log("Found workflow id: " + workflow_id);
 
-        let latestRun = (await octokit.request('GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs', {
+        let latestRun = (await request('GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs', {
             "owner": owner,
             "repo": repo,
             "workflow_id": workflow_id
@@ -36,7 +51,7 @@ const github = require('@actions/github');
             while (latestRun.status !== "completed") {
                 await timeout(interval*1000);
 
-                latestRun = (await octokit.request('GET /repos/{owner}/{repo}/actions/runs/{run_id}', {
+                latestRun = (await request('GET /repos/{owner}/{repo}/actions/runs/{run_id}', {
                     "owner": owner,
                     "repo": repo,
                     "run_id": latestRun.id
